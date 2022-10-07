@@ -1,5 +1,5 @@
 import React, {useState} from "react"
-// import Confetti from "react-confetti"
+import Confetti from "react-confetti"
 import Die from "./Die"
 import {nanoid} from 'nanoid'
 import '../src/index.css'
@@ -9,22 +9,48 @@ export default function App() {
 
   const [diceNum , setDiceNum] = useState(allNewDice)
 
-  function allNewDice() {
-    const newDice = []
-    for(let i = 0; i < 10 ; i++) {
-      newDice.push({
-          value: Math.ceil(Math.random() * 6), 
-          isHeld: false,
-          id: nanoid()
-        })
+  const [tenzies, setTenzies] = useState(false)
+  
+  React.useEffect(() => {
+    const allHeld = diceNum.every(item => item.isHeld)
+    const firstValue = diceNum[0].value
+    const allSameValue = diceNum.every(item => item.value === firstValue)
+    if(allHeld && allSameValue) {
+      setTenzies(true)
+      alert('Winner');
     }
-    return newDice
+
+   
+
+  }, [diceNum])
+
+
+
+  function generateNewRoll() {
+    return {
+      value: Math.ceil(Math.random() * 6), 
+      isHeld: false,
+      id: nanoid()
+    }
   }
 
 
 
+  function allNewDice() {
+    const newDice = []
+    for(let i = 0; i < 10 ; i++) {
+      newDice.push(generateNewRoll())
+    }
+    return newDice
+  }
+
+  
+
+
   function rollDice() {
-    setDiceNum(allNewDice())
+    setDiceNum(prevNum => prevNum.map(item => {
+      return item.isHeld ? item : generateNewRoll()
+    }))
   }
   
   
@@ -33,6 +59,8 @@ export default function App() {
       return item.id === id ? {...item, isHeld: !item.isHeld} : item
     }))
   }
+
+
 
 const diceElements = diceNum.map(item => <Die 
                                               key={item.id} 
@@ -44,6 +72,8 @@ const diceElements = diceNum.map(item => <Die
                                             )
 return (
     <main>
+      <h1 className="title">Tenzies</h1>
+      <p className="instructions">Roll until all dice are the same. Click each die to freeze it at its current value between rolls.</p>
       <div className="dice-container" >
                 {diceElements}
       </div>
