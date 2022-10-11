@@ -4,12 +4,16 @@ import Die from "./Die"
 import {nanoid} from 'nanoid'
 import '../src/index.css'
 
+
+
 export default function App() {
  
 
   const [diceNum , setDiceNum] = useState(allNewDice)
 
   const [tenzies, setTenzies] = useState(false)
+
+
   
   React.useEffect(() => {
     const allHeld = diceNum.every(item => item.isHeld)
@@ -17,7 +21,7 @@ export default function App() {
     const allSameValue = diceNum.every(item => item.value === firstValue)
     if(allHeld && allSameValue) {
       setTenzies(true)
-      alert('Winner');
+     
     }
 
    
@@ -42,15 +46,24 @@ export default function App() {
       newDice.push(generateNewRoll())
     }
     return newDice
+    
   }
 
   
 
 
   function rollDice() {
-    setDiceNum(prevNum => prevNum.map(item => {
-      return item.isHeld ? item : generateNewRoll()
-    }))
+
+    if(!tenzies) {
+
+      setDiceNum(prevNum => prevNum.map(item => {
+        return item.isHeld ? item : generateNewRoll()
+      }))
+    } else {
+      setTenzies(false)
+      setDiceNum(allNewDice())
+    }
+
   }
   
   
@@ -58,6 +71,8 @@ export default function App() {
     setDiceNum(prevNum => prevNum.map(item => {
       return item.id === id ? {...item, isHeld: !item.isHeld} : item
     }))
+
+    
   }
 
 
@@ -71,14 +86,16 @@ const diceElements = diceNum.map(item => <Die
                                               />
                                             )
 return (
-    <main>
+  <main>
+      {tenzies && <Confetti/>}
+      
       <h1 className="title">Tenzies</h1>
       <p className="instructions">Roll until all dice are the same. Click each die to freeze it at its current value between rolls.</p>
       <div className="dice-container" >
                 {diceElements}
       </div>
-      <button className="roll-dice active" onClick={rollDice} >Roll Dice</button>
-
+      <button className="roll-dice active" onClick={rollDice}>{tenzies ? "New Game" : "Roll"}</button>
+      
       
     </main>
   )
